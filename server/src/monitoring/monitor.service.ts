@@ -24,9 +24,15 @@ constructor(
     // Verification immediatement au demarrage
     void this.checkAll(courseCodes);
 
+    
     // Verification toutes les 5 minutes
     cron.schedule("*/5 * * * *", async () => {
-      console.log("Checking course availability...");
+        
+      const timestamp = new Date().toLocaleString("fr-CA");
+
+    console.log(
+    `[${timestamp}] Checking course availability...`,
+    );
 
       await this.checkAll(courseCodes);
     });
