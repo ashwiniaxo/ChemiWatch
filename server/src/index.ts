@@ -6,6 +6,7 @@ import express from "express";
 import { CheminotClient } from "./cheminot/cheminot.client.js";
 import { CourseService } from "./courses/course.service.js";
 import { MonitorService } from "./monitoring/monitor.service.js";
+import { NotificationService } from "./notifications/notification.service.js";
 
 const app = express();
 
@@ -39,8 +40,18 @@ const cheminotClient = new CheminotClient({
 const courseService =
   new CourseService(cheminotClient);
 
+const notificationService =
+  new NotificationService({
+    emailUser: getRequiredEnv("EMAIL_USER"),
+    emailPassword: getRequiredEnv("EMAIL_PASSWORD"),
+    emailTo: getRequiredEnv("EMAIL_TO"),
+  });
+
 const monitorService =
-  new MonitorService(courseService);
+  new MonitorService(
+    courseService,
+    notificationService,
+  );
 
 const watchedCourses = (
   process.env.CHEMINOT_WATCH_COURSES ?? ""

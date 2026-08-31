@@ -5,11 +5,15 @@ import type {
 } from "../cheminot/cheminot.types.js";
 
 import { CourseService } from "../courses/course.service.js";
+import { NotificationService } from "../notifications/notification.service.js";
 
 export class MonitorService {
   private previousStates = new Map<string, CourseAvailability>();
 
-  constructor(private readonly courseService: CourseService) {}
+  constructor(
+    private readonly courseService: CourseService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   watch(courseCodes: string[]): void {
     console.log(
@@ -84,7 +88,7 @@ export class MonitorService {
         `🚨 ${current.code}: a group is now available!`,
       );
 
-      this.notify(current);
+      void this.notificationService.sendCourseAvailability(current);
 
       return;
     }
@@ -103,7 +107,7 @@ export class MonitorService {
           `🚨 ${current.code} group ${currentGroup.number} is now available!`,
         );
 
-        this.notify(current);
+        void this.notificationService.sendCourseAvailability(current);
 
         continue;
       }
@@ -118,7 +122,7 @@ export class MonitorService {
             `${currentGroup.availableSeats} seat(s) available!`,
         );
 
-        this.notify(current);
+        void this.notificationService.sendCourseAvailability(current);
       }
 
       // Optionnel:
@@ -134,26 +138,5 @@ export class MonitorService {
         );
       }
     }
-  }
-
-  private notify(course: CourseAvailability): void {
-    console.log("");
-    console.log("=================================");
-    console.log("🚨 CHEMIWATCH ALERT");
-    console.log(`${course.code} has availability`);
-
-    for (const group of course.groups) {
-      if (!group.available) {
-        continue;
-      }
-
-      console.log(
-        `Group ${group.number}: ` +
-          `${group.availableSeats} seat(s) available`,
-      );
-    }
-
-    console.log("=================================");
-    console.log("");
   }
 }
