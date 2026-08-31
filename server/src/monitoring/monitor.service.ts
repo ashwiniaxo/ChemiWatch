@@ -10,10 +10,11 @@ import { NotificationService } from "../notifications/notification.service.js";
 export class MonitorService {
   private previousStates = new Map<string, CourseAvailability>();
 
-  constructor(
+constructor(
     private readonly courseService: CourseService,
     private readonly notificationService: NotificationService,
-  ) {}
+    private readonly notifyOnStart = false,
+    ) {}
 
   watch(courseCodes: string[]): void {
     console.log(
@@ -62,19 +63,32 @@ export class MonitorService {
   ): void {
     // Premier check
     if (!previous) {
-      console.log(
-        `${current.code}: initial status = ${current.status}`,
-      );
-
-      for (const group of current.groups) {
         console.log(
-          `  Group ${group.number}: ` +
-            `${group.enrolled}/${group.capacity} ` +
-            `(${group.availableSeats} seat(s) available)`,
+            `${current.code}: initial status = ${current.status}`,
         );
-      }
 
-      return;
+        for (const group of current.groups) {
+            console.log(
+            `  Group ${group.number}: ` +
+                `${group.enrolled}/${group.capacity} ` +
+                `(${group.availableSeats} seat(s) available)`,
+            );
+        }
+
+        if (
+            this.notifyOnStart &&
+            current.status === "AVAILABLE"
+        ) {
+            console.log(
+            `📧 Sending initial availability notification for ${current.code}`,
+            );
+
+            void this.notificationService.sendCourseAvailability(
+            current,
+            );
+        }
+
+        return;
     }
 
     // Cas 1:
@@ -91,6 +105,24 @@ export class MonitorService {
       void this.notificationService.sendCourseAvailability(current);
 
       return;
+    }
+
+    // Cas 2:
+    // le cours était disponible avant
+    // puis il devient complet / indisponible
+    if (
+    previous.status === "AVAILABLE" &&
+    current.status !== "AVAILABLE"
+    ) {
+    console.log(
+        `🔴 ${current.code}: no groups are available anymore.`,
+    );
+
+    void this.notificationService.sendCourseFull(
+        current.code,
+    );
+
+    return;
     }
 
     // Cas 2:

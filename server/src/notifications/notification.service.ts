@@ -77,4 +77,25 @@ export class NotificationService {
       `Email notification sent for ${course.code}`,
     );
   }
+
+  async sendCourseFull(courseCode: string): Promise<void> {
+    await this.transporter.sendMail({
+        from: this.config.emailUser,
+        to: this.config.emailTo,
+
+        subject: `🔴 ${courseCode} - no longer available`,
+
+        text: [
+        `ChemiWatch detected that ${courseCode} is no longer available.`,
+        "",
+        "There are currently no selectable groups with available seats.",
+        "",
+        "ChemiWatch will keep monitoring the course and notify you if a group becomes available again.",
+        ].join("\n"),
+    });
+
+    console.log(
+        `Full-course notification sent for ${courseCode}`,
+    );
+    }
 }

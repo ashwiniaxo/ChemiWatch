@@ -11,29 +11,57 @@ export interface CheminotClientConfig {
   programId: string;
   session: string;
   concentration: string;
-  token: string;
+
+  getToken: () => Promise<string>;
+  refreshToken: () => Promise<string>;
 }
 
 export class CheminotClient {
   constructor(private readonly config: CheminotClientConfig) {}
 
   private async get<T>(url: string): Promise<T> {
-    const response = await fetch(`${BASE_URL}${url}`, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${this.config.token}`,
-      },
-    });
+    let token = await this.config.getToken();
+
+    let response = await this.request(
+        url,
+        token,
+    );
+
+    if (response.status === 401) {
+        console.log(
+        "ChemiNot token expired. Refreshing session...",
+        );
+
+        token =
+        await this.config.refreshToken();
+
+        response = await this.request(
+        url,
+        token,
+        );
+    }
 
     if (!response.ok) {
-      throw new Error(
+        throw new Error(
         `ChemiNot request failed: ${response.status} ${response.statusText}`,
-      );
+        );
     }
 
     return (await response.json()) as T;
-  }
+    }
+
+    private async request(
+    url: string,
+    token: string,
+    ): Promise<Response> {
+    return fetch(`${BASE_URL}${url}`, {
+        method: "GET",
+        headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+        },
+    });
+    }
 
   async validateCourse(courseCode: string): Promise<CheminotError[]> {
     const {

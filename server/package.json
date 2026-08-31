@@ -4,6 +4,7 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
+    "auth": "tsx src/auth.ts",
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js"
@@ -17,7 +18,8 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "node-cron": "^4.6.0",
-    "nodemailer": "^9.1.0"
+    "nodemailer": "^9.1.0",
+    "playwright": "^1.62.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

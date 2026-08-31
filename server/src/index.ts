@@ -7,6 +7,7 @@ import { CheminotClient } from "./cheminot/cheminot.client.js";
 import { CourseService } from "./courses/course.service.js";
 import { MonitorService } from "./monitoring/monitor.service.js";
 import { NotificationService } from "./notifications/notification.service.js";
+import { CheminotSession } from "./cheminot/cheminot.session.js";
 
 const app = express();
 
@@ -27,6 +28,9 @@ function getRequiredEnv(name: string): string {
   return value;
 }
 
+const cheminotSession = new CheminotSession();
+await cheminotSession.start(true);
+
 const cheminotClient = new CheminotClient({
   studentId: getRequiredEnv("CHEMINOT_STUDENT_ID"),
   programId: getRequiredEnv("CHEMINOT_PROGRAM_ID"),
@@ -34,7 +38,12 @@ const cheminotClient = new CheminotClient({
   concentration: getRequiredEnv(
     "CHEMINOT_CONCENTRATION",
   ),
-  token: getRequiredEnv("CHEMINOT_TOKEN"),
+
+  getToken: () =>
+    cheminotSession.getToken(),
+
+  refreshToken: () =>
+    cheminotSession.refreshToken(),
 });
 
 const courseService =
@@ -47,10 +56,14 @@ const notificationService =
     emailTo: getRequiredEnv("EMAIL_TO"),
   });
 
+const notifyOnStart =
+  process.env.CHEMINOT_NOTIFY_ON_START === "true";
+
 const monitorService =
   new MonitorService(
     courseService,
     notificationService,
+    notifyOnStart,
   );
 
 const watchedCourses = (
@@ -99,6 +112,22 @@ app.get(
     }
   },
 );
+
+async function shutdown(): Promise<void> {
+  console.log("Shutting down ChemiWatch...");
+
+  await cheminotSession.close();
+
+  process.exit(0);
+}
+
+process.on("SIGINT", () => {
+  void shutdown();
+});
+
+process.on("SIGTERM", () => {
+  void shutdown();
+});
 
 app.listen(PORT, () => {
   console.log(
