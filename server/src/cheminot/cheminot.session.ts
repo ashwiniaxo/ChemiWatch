@@ -1,12 +1,6 @@
-import {
-  chromium,
-  type BrowserContext,
-  type Page,
-  type Request,
-} from "playwright";
+import { chromium, type BrowserContext, type Page, type Request } from "playwright";
 
-const CHEMINOT_URL =
-  "https://cheminotn.etsmtl.ca/inscription";
+const CHEMINOT_URL = "https://cheminotn.etsmtl.ca/inscription";
 
 export class CheminotSession {
   private context: BrowserContext | null = null;
@@ -22,21 +16,15 @@ export class CheminotSession {
       return;
     }
 
-    this.context =
-      await chromium.launchPersistentContext(
-        ".chemiwatch-profile",
-        {
-          headless,
-        },
-      );
+    this.context = await chromium.launchPersistentContext(".chemiwatch-profile", {
+      headless,
+    });
 
     this.context.on("request", (request) => {
       this.captureToken(request);
     });
 
-    this.page =
-      this.context.pages()[0] ??
-      (await this.context.newPage());
+    this.page = this.context.pages()[0] ?? (await this.context.newPage());
 
     await this.ensureCheminotPage();
   }
@@ -48,33 +36,21 @@ export class CheminotSession {
       return;
     }
 
-    const authorization =
-      request.headers()["authorization"];
+    const authorization = request.headers()["authorization"];
 
-    if (
-      authorization &&
-      authorization.startsWith("Bearer ")
-    ) {
-      this.token = authorization.slice(
-        "Bearer ".length,
-      );
+    if (authorization && authorization.startsWith("Bearer ")) {
+      this.token = authorization.slice("Bearer ".length);
     }
   }
 
   private async ensureCheminotPage(): Promise<void> {
     if (!this.page) {
-      throw new Error(
-        "ChemiNot browser page is not available.",
-      );
+      throw new Error("ChemiNot browser page is not available.");
     }
 
     const currentUrl = this.page.url();
 
-    if (
-      currentUrl.startsWith(
-        "https://cheminotn.etsmtl.ca/",
-      )
-    ) {
+    if (currentUrl.startsWith("https://cheminotn.etsmtl.ca/")) {
       return;
     }
 
@@ -86,9 +62,7 @@ export class CheminotSession {
     } catch (error) {
       // Certaines redirections Microsoft peuvent provoquer ERR_ABORTED
       // même si la navigation continue correctement.
-      console.warn(
-        "ChemiNot navigation was interrupted; checking resulting page...",
-      );
+      console.warn("ChemiNot navigation was interrupted; checking resulting page...");
     }
   }
 
@@ -111,8 +85,7 @@ export class CheminotSession {
       return this.refreshPromise;
     }
 
-    this.refreshPromise =
-      this.performTokenRefresh();
+    this.refreshPromise = this.performTokenRefresh();
 
     try {
       return await this.refreshPromise;
@@ -123,16 +96,12 @@ export class CheminotSession {
 
   private async performTokenRefresh(): Promise<string> {
     if (!this.page) {
-      throw new Error(
-        "ChemiNot browser session is not started.",
-      );
+      throw new Error("ChemiNot browser session is not started.");
     }
 
     this.token = null;
 
-    console.log(
-      "Refreshing ChemiNot authentication session...",
-    );
+    console.log("Refreshing ChemiNot authentication session...");
 
     try {
       await this.page.goto(CHEMINOT_URL, {
@@ -140,29 +109,21 @@ export class CheminotSession {
         timeout: 30000,
       });
     } catch {
-      console.warn(
-        "Navigation interrupted during authentication refresh.",
-      );
+      console.warn("Navigation interrupted during authentication refresh.");
     }
 
     const token = await this.waitForToken(20000);
 
     if (token) {
-      console.log(
-        "ChemiNot authentication token acquired.",
-      );
+      console.log("ChemiNot authentication token acquired.");
 
       return token;
     }
 
-    throw new Error(
-      "ChemiNot authentication required. Run `npm run auth` and sign in again.",
-    );
+    throw new Error("ChemiNot authentication required. Run `npm run auth` and sign in again.");
   }
 
-  private async waitForToken(
-    timeoutMs: number,
-  ): Promise<string | null> {
+  private async waitForToken(timeoutMs: number): Promise<string | null> {
     const deadline = Date.now() + timeoutMs;
 
     while (Date.now() < deadline) {
@@ -170,9 +131,7 @@ export class CheminotSession {
         return this.token;
       }
 
-      await new Promise((resolve) =>
-        setTimeout(resolve, 250),
-      );
+      await new Promise((resolve) => setTimeout(resolve, 250));
     }
 
     return null;

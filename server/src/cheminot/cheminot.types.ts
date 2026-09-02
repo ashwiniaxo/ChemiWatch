@@ -64,10 +64,7 @@ export interface Group {
   activities: Activity[];
 }
 
-export type CourseAvailabilityStatus =
-  | "AVAILABLE"
-  | "NO_AVAILABLE_GROUPS"
-  | "NOT_ACCESSIBLE";
+export type CourseAvailabilityStatus = "AVAILABLE" | "NO_AVAILABLE_GROUPS" | "NOT_ACCESSIBLE";
 
 export interface CourseAvailability {
   code: string;

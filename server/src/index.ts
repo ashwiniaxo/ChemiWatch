@@ -20,9 +20,7 @@ function getRequiredEnv(name: string): string {
   const value = process.env[name];
 
   if (!value) {
-    throw new Error(
-      `Missing environment variable: ${name}`,
-    );
+    throw new Error(`Missing environment variable: ${name}`);
   }
 
   return value;
@@ -35,44 +33,28 @@ const cheminotClient = new CheminotClient({
   studentId: getRequiredEnv("CHEMINOT_STUDENT_ID"),
   programId: getRequiredEnv("CHEMINOT_PROGRAM_ID"),
   session: getRequiredEnv("CHEMINOT_SESSION"),
-  concentration: getRequiredEnv(
-    "CHEMINOT_CONCENTRATION",
-  ),
+  concentration: getRequiredEnv("CHEMINOT_CONCENTRATION"),
 
-  getToken: () =>
-    cheminotSession.getToken(),
+  getToken: () => cheminotSession.getToken(),
 
-  refreshToken: () =>
-    cheminotSession.refreshToken(),
+  refreshToken: () => cheminotSession.refreshToken(),
 });
 
-const courseService =
-  new CourseService(cheminotClient);
+const courseService = new CourseService(cheminotClient);
 
-const notificationService =
-  new NotificationService({
-    emailUser: getRequiredEnv("EMAIL_USER"),
-    emailPassword: getRequiredEnv("EMAIL_PASSWORD"),
-    emailTo: getRequiredEnv("EMAIL_TO"),
-  });
+const notificationService = new NotificationService({
+  emailUser: getRequiredEnv("EMAIL_USER"),
+  emailPassword: getRequiredEnv("EMAIL_PASSWORD"),
+  emailTo: getRequiredEnv("EMAIL_TO"),
+});
 
-const notifyOnStart =
-  process.env.CHEMINOT_NOTIFY_ON_START === "true";
+const notifyOnStart = process.env.CHEMINOT_NOTIFY_ON_START === "true";
 
-const monitorService =
-  new MonitorService(
-    courseService,
-    notificationService,
-    notifyOnStart,
-  );
+const monitorService = new MonitorService(courseService, notificationService, notifyOnStart);
 
-const watchedCourses = (
-  process.env.CHEMINOT_WATCH_COURSES ?? ""
-)
+const watchedCourses = (process.env.CHEMINOT_WATCH_COURSES ?? "")
   .split(",")
-  .map((course) =>
-    course.trim().toUpperCase(),
-  )
+  .map((course) => course.trim().toUpperCase())
   .filter(Boolean);
 
 if (watchedCourses.length > 0) {
@@ -92,26 +74,19 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
-app.get(
-  "/api/courses/:courseCode",
-  async (req, res) => {
-    try {
-      const result =
-        await courseService.getCourseAvailability(
-          req.params.courseCode,
-        );
+app.get("/api/courses/:courseCode", async (req, res) => {
+  try {
+    const result = await courseService.getCourseAvailability(req.params.courseCode);
 
-      res.json(result);
-    } catch (error) {
-      console.error(error);
+    res.json(result);
+  } catch (error) {
+    console.error(error);
 
-      res.status(500).json({
-        error:
-          "Failed to retrieve course availability.",
-      });
-    }
-  },
-);
+    res.status(500).json({
+      error: "Failed to retrieve course availability.",
+    });
+  }
+});
 
 async function shutdown(): Promise<void> {
   console.log("Shutting down ChemiWatch...");
@@ -130,7 +105,5 @@ process.on("SIGTERM", () => {
 });
 
 app.listen(PORT, () => {
-  console.log(
-    `ChemiWatch API running on http://localhost:${PORT}`,
-  );
+  console.log(`ChemiWatch API running on http://localhost:${PORT}`);
 });

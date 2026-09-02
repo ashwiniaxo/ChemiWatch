@@ -1,8 +1,6 @@
 import nodemailer from "nodemailer";
 
-import type {
-  CourseAvailability,
-} from "../cheminot/cheminot.types.js";
+import type { CourseAvailability } from "../cheminot/cheminot.types.js";
 
 export interface NotificationServiceConfig {
   emailUser: string;
@@ -13,9 +11,7 @@ export interface NotificationServiceConfig {
 export class NotificationService {
   private transporter;
 
-  constructor(
-    private readonly config: NotificationServiceConfig,
-  ) {
+  constructor(private readonly config: NotificationServiceConfig) {
     this.transporter = nodemailer.createTransport({
       service: "gmail",
 
@@ -26,12 +22,8 @@ export class NotificationService {
     });
   }
 
-  async sendCourseAvailability(
-    course: CourseAvailability,
-  ): Promise<void> {
-    const availableGroups = course.groups.filter(
-      (group) => group.available,
-    );
+  async sendCourseAvailability(course: CourseAvailability): Promise<void> {
+    const availableGroups = course.groups.filter((group) => group.available);
 
     if (availableGroups.length === 0) {
       return;
@@ -61,8 +53,7 @@ export class NotificationService {
 
       to: this.config.emailTo,
 
-      subject:
-        `🚨 ${course.code} - course availability detected`,
+      subject: `🚨 ${course.code} - course availability detected`,
 
       text: [
         `ChemiWatch detected availability for ${course.code}.`,
@@ -73,29 +64,25 @@ export class NotificationService {
       ].join("\n"),
     });
 
-    console.log(
-      `Email notification sent for ${course.code}`,
-    );
+    console.log(`Email notification sent for ${course.code}`);
   }
 
   async sendCourseFull(courseCode: string): Promise<void> {
     await this.transporter.sendMail({
-        from: this.config.emailUser,
-        to: this.config.emailTo,
+      from: this.config.emailUser,
+      to: this.config.emailTo,
 
-        subject: `🔴 ${courseCode} - no longer available`,
+      subject: `🔴 ${courseCode} - no longer available`,
 
-        text: [
+      text: [
         `ChemiWatch detected that ${courseCode} is no longer available.`,
         "",
         "There are currently no selectable groups with available seats.",
         "",
         "ChemiWatch will keep monitoring the course and notify you if a group becomes available again.",
-        ].join("\n"),
+      ].join("\n"),
     });
 
-    console.log(
-        `Full-course notification sent for ${courseCode}`,
-    );
-    }
+    console.log(`Full-course notification sent for ${courseCode}`);
+  }
 }

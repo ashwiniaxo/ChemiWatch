@@ -1,9 +1,4 @@
-import type {
-  Activity,
-  CheminotActivity,
-  CheminotGroup,
-  Group,
-} from "./cheminot.types.js";
+import type { Activity, CheminotActivity, CheminotGroup, Group } from "./cheminot.types.js";
 
 export function mapActivity(activity: CheminotActivity): Activity {
   return {
@@ -17,10 +12,7 @@ export function mapActivity(activity: CheminotActivity): Activity {
 }
 
 export function mapGroup(group: CheminotGroup): Group {
-  const availableSeats = Math.max(
-    group.NbPlaces - group.NbInscrits,
-    0,
-  );
+  const availableSeats = Math.max(group.NbPlaces - group.NbInscrits, 0);
 
   return {
     number: group.NoGroupe,
