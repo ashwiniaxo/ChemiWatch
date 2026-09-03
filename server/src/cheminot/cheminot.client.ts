@@ -16,8 +16,6 @@ import type {
   CheminotScheduleCourse,
 } from "./cheminot.types.js";
 
-//const BASE_URL = "https://cheminotn.etsmtl.ca/api";
-
 /**
  * Configuration required by the ChemiNot API client
  *
