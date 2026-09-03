@@ -1,3 +1,11 @@
+/**
+ * Manages the authenticated ChemiNot browser session using Playwright
+ *
+ * ChemiNot uses Microsoft authentication with short-lived Bearer tokens.
+ * This service keeps a persistent Chromium profile, captures tokens from
+ * ChemiNot API requests, and refreshes the browser session when necessary.
+ */
+
 import { chromium, type BrowserContext, type Page, type Request } from "playwright";
 
 const CHEMINOT_URL = "https://cheminotn.etsmtl.ca/inscription";
@@ -5,10 +13,7 @@ const CHEMINOT_URL = "https://cheminotn.etsmtl.ca/inscription";
 export class CheminotSession {
   private context: BrowserContext | null = null;
   private page: Page | null = null;
-
   private token: string | null = null;
-
-  // Empêche plusieurs refresh simultanés
   private refreshPromise: Promise<string> | null = null;
 
   async start(headless = true): Promise<void> {

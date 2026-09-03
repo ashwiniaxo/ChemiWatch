@@ -1,5 +1,16 @@
-import "dotenv/config";
+/**
+ * Main entry point for the ChemiWatch backend
+ *
+ * Responsibilities:
+ * - Load environment configuration
+ * - Start the persistent ChemiNot browser session
+ * - Create and connect application services
+ * - Start the course monitor
+ * - Expose the Express HTTP API
+ * - Gracefully close Playwright when the application stops
+ */
 
+import "dotenv/config";
 import cors from "cors";
 import express from "express";
 

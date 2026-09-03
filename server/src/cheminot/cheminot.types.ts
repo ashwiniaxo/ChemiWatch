@@ -1,3 +1,17 @@
+/**
+ * Defines the data structures used by ChemiWatch.
+ *
+ * This file contains:
+ * - Types matching the raw JSON returned by the ChemiNot API.
+ * - Internal types used by the rest of this application.
+ *
+ */
+
+// -----------------------------------------------------------------------------
+// ChemiNot API
+// It matches the JSON structure returned directly by ChemiNot
+// -----------------------------------------------------------------------------
+
 export interface CheminotError {
   Message: string;
   Title: string;
@@ -42,7 +56,10 @@ export interface CheminotScheduleCourse {
   Activites: CheminotActivity[];
 }
 
-// ---------- ChemiTrack types ----------
+// -----------------------------------------------------------------------------
+// ChemiWatch internal types
+// These types are used by this application
+// -----------------------------------------------------------------------------
 
 export interface Activity {
   day: number;

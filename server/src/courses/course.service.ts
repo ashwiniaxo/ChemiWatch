@@ -1,3 +1,10 @@
+/**
+ * Contains the logic used to determine course availability.
+ *
+ * This service translates low-level ChemiNot API responses into the simpler
+ * CourseAvailability model used by the API, monitor, and frontend.
+ */
+
 import type { CourseAvailability, Group } from "../cheminot/cheminot.types.js";
 
 import { CheminotClient } from "../cheminot/cheminot.client.js";

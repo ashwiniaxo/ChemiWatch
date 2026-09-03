@@ -1,5 +1,12 @@
-import nodemailer from "nodemailer";
+/**
+ * Sends ChemiWatch email notifications using Nodemailer
+ *
+ * Emails are sent when:
+ * - A watched course becomes available
+ * - A watched course becomes full/unavailable again
+ */
 
+import nodemailer from "nodemailer";
 import type { CourseAvailability } from "../cheminot/cheminot.types.js";
 
 export interface NotificationServiceConfig {

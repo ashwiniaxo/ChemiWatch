@@ -1,3 +1,14 @@
+/**
+ * Interactive authentication utility for ChemiWatch
+ *
+ * Run with:
+ *   npm run auth
+ *
+ * This opens a visible Chromium window so the user can sign in to ChemiNot
+ * normally and complete Microsoft MFA. The authenticated browser profile is
+ * then reused by the background ChemiWatch server
+ */
+
 import { CheminotSession } from "./cheminot/cheminot.session.js";
 
 const session = new CheminotSession();

@@ -1,3 +1,11 @@
+/**
+ * Periodically monitors course availability and detects status changes
+ *
+ * The service keeps the previous state of every watched course in memory.
+ * Every five minutes, it compares the latest state with the previous one
+ * and sends notifications when availability changes
+ */
+
 import cron from "node-cron";
 
 import type { CourseAvailability } from "../cheminot/cheminot.types.js";
