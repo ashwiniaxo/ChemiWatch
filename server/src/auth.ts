@@ -9,9 +9,23 @@
  * then reused by the background ChemiWatch server
  */
 
+import "dotenv/config";
 import { CheminotSession } from "./cheminot/cheminot.session.js";
 
-const session = new CheminotSession();
+function getRequiredEnv(name: string): string {
+  const value = process.env[name];
+
+  if (!value) {
+    throw new Error(`Missing environment variable: ${name}`);
+  }
+
+  return value;
+}
+
+const session = new CheminotSession(
+  getRequiredEnv("CHEMINOT_LOGIN_URL"),
+  getRequiredEnv("CHEMINOT_BASE_URL"),
+);
 
 console.log("Opening ChemiNot authentication...");
 console.log("Log in normally and complete MFA if requested.");

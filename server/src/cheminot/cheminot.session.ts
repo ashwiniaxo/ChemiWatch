@@ -8,13 +8,16 @@
 
 import { chromium, type BrowserContext, type Page, type Request } from "playwright";
 
-const CHEMINOT_URL = "https://cheminotn.etsmtl.ca/inscription";
-
 export class CheminotSession {
   private context: BrowserContext | null = null;
   private page: Page | null = null;
   private token: string | null = null;
   private refreshPromise: Promise<string> | null = null;
+
+  constructor(
+    private readonly loginUrl: string,
+    private readonly apiBaseUrl: string,
+  ) {}
 
   async start(headless = true): Promise<void> {
     if (this.context) {
@@ -37,7 +40,7 @@ export class CheminotSession {
   private captureToken(request: Request): void {
     const url = request.url();
 
-    if (!url.includes("cheminotn.etsmtl.ca/api/")) {
+    if (!url.startsWith(this.apiBaseUrl)) {
       return;
     }
 
@@ -55,18 +58,20 @@ export class CheminotSession {
 
     const currentUrl = this.page.url();
 
-    if (currentUrl.startsWith("https://cheminotn.etsmtl.ca/")) {
+    const loginOrigin = new URL(this.loginUrl).origin;
+
+    if (currentUrl.startsWith(loginOrigin)) {
       return;
     }
 
     try {
-      await this.page.goto(CHEMINOT_URL, {
+      await this.page.goto(this.loginUrl, {
         waitUntil: "domcontentloaded",
         timeout: 30000,
       });
-    } catch (error) {
-      // Certaines redirections Microsoft peuvent provoquer ERR_ABORTED
-      // même si la navigation continue correctement.
+    } catch {
+      // Authentication redirects can interrupt navigation even when
+      // the browser successfully continues to the destination.
       console.warn("ChemiNot navigation was interrupted; checking resulting page...");
     }
   }
@@ -84,8 +89,6 @@ export class CheminotSession {
   }
 
   async refreshToken(): Promise<string> {
-    // Si un refresh est déjà en cours,
-    // les autres appels attendent le même résultat.
     if (this.refreshPromise) {
       return this.refreshPromise;
     }
@@ -109,7 +112,7 @@ export class CheminotSession {
     console.log("Refreshing ChemiNot authentication session...");
 
     try {
-      await this.page.goto(CHEMINOT_URL, {
+      await this.page.goto(this.loginUrl, {
         waitUntil: "domcontentloaded",
         timeout: 30000,
       });

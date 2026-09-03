@@ -16,7 +16,7 @@ import type {
   CheminotScheduleCourse,
 } from "./cheminot.types.js";
 
-const BASE_URL = "https://cheminotn.etsmtl.ca/api";
+//const BASE_URL = "https://cheminotn.etsmtl.ca/api";
 
 /**
  * Configuration required by the ChemiNot API client
@@ -24,6 +24,7 @@ const BASE_URL = "https://cheminotn.etsmtl.ca/api";
  * Token retrieval is injected
  */
 export interface CheminotClientConfig {
+  baseUrl: string;
   studentId: string;
   programId: string;
   session: string;
@@ -69,7 +70,7 @@ export class CheminotClient {
    * Sends a single authenticated HTTP request to ChemiNot.
    */
   private async request(url: string, token: string): Promise<Response> {
-    return fetch(`${BASE_URL}${url}`, {
+    return fetch(`${this.config.baseUrl}${url}`, {
       method: "GET",
       headers: {
         Accept: "application/json",

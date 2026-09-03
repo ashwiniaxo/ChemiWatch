@@ -37,17 +37,20 @@ function getRequiredEnv(name: string): string {
   return value;
 }
 
-const cheminotSession = new CheminotSession();
+const cheminotSession = new CheminotSession(
+  getRequiredEnv("CHEMINOT_LOGIN_URL"),
+  getRequiredEnv("CHEMINOT_BASE_URL"),
+);
 await cheminotSession.start(true);
 
 const cheminotClient = new CheminotClient({
+  baseUrl: getRequiredEnv("CHEMINOT_BASE_URL"),
   studentId: getRequiredEnv("CHEMINOT_STUDENT_ID"),
   programId: getRequiredEnv("CHEMINOT_PROGRAM_ID"),
   session: getRequiredEnv("CHEMINOT_SESSION"),
   concentration: getRequiredEnv("CHEMINOT_CONCENTRATION"),
 
   getToken: () => cheminotSession.getToken(),
-
   refreshToken: () => cheminotSession.refreshToken(),
 });
 
