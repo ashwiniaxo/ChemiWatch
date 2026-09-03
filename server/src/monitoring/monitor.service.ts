@@ -25,10 +25,10 @@ export class MonitorService {
   watch(courseCodes: string[]): void {
     console.log(`Monitoring courses: ${courseCodes.join(", ")}`);
 
-    // Verification immediatement au demarrage
+    // Verification at the start of the application
     void this.checkAll(courseCodes);
 
-    // Verification toutes les 5 minutes
+    // Verification every 5 mins
     cron.schedule("*/5 * * * *", async () => {
       const timestamp = new Date().toLocaleString("fr-CA");
 
@@ -47,11 +47,8 @@ export class MonitorService {
   private async checkCourse(courseCode: string): Promise<void> {
     try {
       const current = await this.courseService.getCourseAvailability(courseCode);
-
       const previous = this.previousStates.get(courseCode);
-
       this.detectChanges(previous, current);
-
       this.previousStates.set(courseCode, current);
     } catch (error) {
       console.error(`Failed to check ${courseCode}:`, error);
@@ -62,7 +59,6 @@ export class MonitorService {
     previous: CourseAvailability | undefined,
     current: CourseAvailability,
   ): void {
-    // Premier check
     if (!previous) {
       console.log(`${current.code}: initial status = ${current.status}`);
 
@@ -83,9 +79,7 @@ export class MonitorService {
       return;
     }
 
-    // Cas 1:
-    // aucun groupe disponible avant
-    // puis un groupe devient disponible
+    // Case 1: the course was unavailable and is now available
     if (previous.status !== "AVAILABLE" && current.status === "AVAILABLE") {
       console.log(`🚨 ${current.code}: a group is now available!`);
 
@@ -94,23 +88,18 @@ export class MonitorService {
       return;
     }
 
-    // Cas 2:
-    // le cours était disponible avant
-    // puis il devient complet / indisponible
+    // Case 2: the course was available and is now full
     if (previous.status === "AVAILABLE" && current.status !== "AVAILABLE") {
       console.log(`🔴 ${current.code}: no groups are available anymore.`);
-
       void this.notificationService.sendCourseFull(current.code);
-
       return;
     }
 
-    // Cas 2:
-    // comparer chaque groupe
+    // Case 3: the course remains available, so compare individual groups
     for (const currentGroup of current.groups) {
       const previousGroup = previous.groups.find((group) => group.number === currentGroup.number);
 
-      // Le groupe n'existait pas dans le resultat precedent
+      // A group that was not previously offered is open now
       if (!previousGroup) {
         console.log(`🚨 ${current.code} group ${currentGroup.number} is now available!`);
 
@@ -119,7 +108,7 @@ export class MonitorService {
         continue;
       }
 
-      // Le groupe etait plein puis une place est apparue
+      // A previously full group now has at least one available seat
       if (previousGroup.availableSeats === 0 && currentGroup.availableSeats > 0) {
         console.log(
           `🚨 ${current.code} group ${currentGroup.number}: ` +
@@ -129,8 +118,7 @@ export class MonitorService {
         void this.notificationService.sendCourseAvailability(current);
       }
 
-      // Optionnel:
-      // loguer simplement un changement du nombre de places
+      // Log seat count changes even when no notification needs to be sent
       if (previousGroup.availableSeats !== currentGroup.availableSeats) {
         console.log(
           `${current.code} group ${currentGroup.number}: ` +
