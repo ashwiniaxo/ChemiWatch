@@ -122,9 +122,7 @@ You can use `.env.example` as a template.
 
 ---
 
-# 🔐 Authentication
-
-ChemiWatch uses Playwright to keep a persistent authenticated ChemiNot browser session.
+# Running ChemiWatch
 
 Before starting the server for the first time, run:
 
@@ -155,10 +153,6 @@ If the session eventually expires and automatic refresh no longer works, simply 
 ```bash
 npm run auth
 ```
-
----
-
-# Running ChemiWatch
 
 Start the development server:
 
